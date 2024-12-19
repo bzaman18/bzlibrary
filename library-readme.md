@@ -65,7 +65,7 @@ PostgreSQL is recommended for production due to:
 ### Local Development Setup
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/bzlibrary.git
+   git clone https://github.com/bzaman18/bzlibrary.git
    cd bzlibrary
    ```
 
