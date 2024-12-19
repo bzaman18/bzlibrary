@@ -1,0 +1,14 @@
+# application-prod.yml
+spring:
+  datasource:
+    platform: postgres
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/lib_prod
+    username: USE_SECRET
+    password: USE_SECRET
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create-drop

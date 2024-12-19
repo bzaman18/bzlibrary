@@ -1,0 +1,10 @@
+# application-dev.yml
+spring:
+  datasource:
+    url: jdbc:h2:mem:lib_dev
+    username: root
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true

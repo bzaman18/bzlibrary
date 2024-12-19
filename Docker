@@ -1,0 +1,49 @@
+# Build Stage
+FROM maven:3.8.4-openjdk-17-slim AS build
+WORKDIR /app
+
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Copy the source code and do build
+COPY src ./src
+RUN mvn package
+
+FROM amazoncorretto:17-alpine
+WORKDIR /app
+
+# Copy the built JAR file from the build stage
+COPY --from=build /app/target/*.jar app.jar
+
+# Set the log file path
+ENV LOG_FILE_PATH=/app/logs/bzlibrary.log
+
+# Run the application
+CMD ["java", "-Dlogging.file.path=${LOG_FILE_PATH}", "-jar", "app.jar"]
+
+# docker run -p 8080:8080 bzlibrary
+# docker run -p 8080:8080 -e "SPRING_PROFILES_ACTIVE=prod" bzlibrary
+
+
+
+
+
+# Dockerfile
+FROM eclipse-temurin:17-jdk-alpine as build
+WORKDIR /workspace/app
+
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+COPY src src
+
+RUN ./mvnw install -DskipTests
+RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+
+FROM eclipse-temurin:17-jre-alpine
+VOLUME /tmp
+ARG DEPENDENCY=/workspace/app/target/dependency
+COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
+COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
+COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
+ENTRYPOINT ["java","-cp","app:app/lib/*","com.mylibrary.MylibraryApplication"]

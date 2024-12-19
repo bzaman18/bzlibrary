@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bzlibrary-config
+  namespace: bzlibrary
+data:
+  application.properties: |
+    spring.jpa.hibernate.ddl-auto=update
+    spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+    spring.datasource.driver-class-name=org.postgresql.Driver
