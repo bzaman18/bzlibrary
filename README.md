@@ -201,7 +201,7 @@ spring:
 
 1. Build the Docker image:
    ```bash
-   docker build -t mylibrary:latest .
+   docker build -t bzlibrary:latest .
    ```
 
 2. Run with Docker Compose:
@@ -226,8 +226,8 @@ The application will be available at `http://localhost:8080`
 
 2. Verify deployment:
    ```bash
-   kubectl get pods -n mylibrary
-   kubectl get services -n mylibrary
+   kubectl get pods -n bzlibrary
+   kubectl get services -n bzlibrary
    ```
 
 ## Monitoring and Health Checks
@@ -251,9 +251,35 @@ management:
 
 ## Security Considerations
 
+For production following are recommended:
+
 - All endpoints require authentication in production(OAuth, JWT)
 - HTTPS is enforced in production
 - Database credentials are managed through Kubernetes secrets
 - Regular security updates should be applied
 
+###  Authentication
+- Implement **JWT-based authentication** for stateless and scalable authentication.
+- Use a centralized authentication provider like **Keycloak/RedHat SSO** or **Auth0** to handle user logins, generate tokens, and manage roles and permissions.
+- For custom authentication, use Spring Security to validate JWTs and manage user roles in the application.
+
+### Authorization
+- Adopt **Role-Based Access Control (RBAC)** for simple role management or **Attribute-Based Access Control (ABAC)** for more granular permissions.
+- Embed roles and permissions as claims within the JWTs issued by the authentication server.
+- Use Spring Security to dynamically validate roles and permissions during API requests.
+
+### Observability
+- Integrate **Spring Actuator** to monitor authentication and authorization endpoints.
+- Implement custom security measures to ensure sensitive metrics and logs are only accessible by authorized users.
+- Use monitoring tools like **Prometheus**, **Grafana**, and **ELK Stack** to track authentication and authorization metrics.
+
+### Token Best Practices
+- Use short-lived JWTs and implement refresh tokens to minimize the impact of token leakage.
+- Rotate signing keys periodically and enforce strict expiration policies for enhanced security.
+- Avoid storing sensitive user information in JWT payloads to prevent unintended data exposure.
+
+### Scalability
+- Deploy an **API Gateway** (e.g., Spring Cloud Gateway) to centralize authentication and request routing.
+- Ensure all microservices are stateless by validating JWTs in each service independently.
+- Implement caching strategies for token validation to reduce latency and improve performance.
 
