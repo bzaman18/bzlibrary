@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
-class BookControllerTest {
+class LibraryControllerTest {
 
     @Mock
     private LibraryService libraryService;
