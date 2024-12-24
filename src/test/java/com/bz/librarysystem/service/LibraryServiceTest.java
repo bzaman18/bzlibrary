@@ -203,7 +203,7 @@ class LibraryServiceTest {
 
     @Test
     void registerBook_DifferentIsbnSameTitleAuthor_Success() {
-        // Different ISBN means different books
+        // Req: Different ISBN means different books
         BookDto book1 = new BookDto();
         book1.setIsbn("123-456");
         book1.setTitle("Same Title");
@@ -229,7 +229,7 @@ class LibraryServiceTest {
 
     @Test
     void registerBook_SameIsbnDifferentTitleAuthor_ThrowsException() {
-        // Requirement 2 & 3: Same ISBN must have same title and author
+        //Requirment: Same ISBN must have same title and author
         BookDto newBook = new BookDto();
         newBook.setIsbn("123-456");
         newBook.setTitle("Different Title");
@@ -247,7 +247,7 @@ class LibraryServiceTest {
 
     @Test
     void registerBook_MultipleCopiesSameIsbn_Success() {
-        // Requirement 4: Multiple copies with same ISBN are allowed
+        // Requirement:Multiple copies with same ISBN are allowed
         BookDto bookDto = new BookDto();
         bookDto.setIsbn("123-456");
         bookDto.setTitle("Test Title");
