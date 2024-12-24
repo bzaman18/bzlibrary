@@ -103,6 +103,11 @@ GET /api/v1/library/books
 Retrieve all books in the library system
 Response: 200 OK
 - Returns a list of all books
+
+GET /api/v1/library/books/inventory
+Retrieves an inventory of all books grouped by isbn,together with number of copies of each book
+Response: 200 OK
+- Returns a list of all books
 ```
 
 ### Borrower Management
@@ -141,6 +146,9 @@ Response: 200 OK
 Error responses:
 - 404: No active loan found for this book
 ```
+
+### Same Title/Author/ISBN Book allowed
+![img.png](img.png)
 
 ### Request/Response Models
 
@@ -283,3 +291,8 @@ For production following are recommended:
 - Ensure all microservices are stateless by validating JWTs in each service independently.
 - Implement caching strategies for token validation to reduce latency and improve performance.
 
+
+### Other Enhancements
+- Rate Limiting
+- Fine calculation for late returns
+- Book categories and search functionality

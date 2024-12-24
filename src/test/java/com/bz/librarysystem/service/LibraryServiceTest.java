@@ -7,6 +7,7 @@ import com.bz.librarysystem.entity.Borrower;
 import com.bz.librarysystem.entity.LoanRecord;
 import com.bz.librarysystem.exception.BookAlreadyBorrowedException;
 import com.bz.librarysystem.exception.ResourceNotFoundException;
+import com.bz.librarysystem.exception.InvalidBookDataException;
 import com.bz.librarysystem.repository.BookRepository;
 import com.bz.librarysystem.repository.BorrowerRepository;
 import com.bz.librarysystem.repository.LoanRecordRepository;
@@ -198,4 +199,105 @@ class LibraryServiceTest {
         );
         verify(loanRecordRepository).findByBookIdAndReturnedAtIsNull(TEST_BOOK_UUID);
     }
+
+
+    @Test
+    void registerBook_DifferentIsbnSameTitleAuthor_Success() {
+        // Different ISBN means different books
+        BookDto book1 = new BookDto();
+        book1.setIsbn("123-456");
+        book1.setTitle("Same Title");
+        book1.setAuthor("Same Author");
+
+        BookDto book2 = new BookDto();
+        book2.setIsbn("789-012");
+        book2.setTitle("Same Title");
+        book2.setAuthor("Same Author");
+
+        when(bookRepository.findByIsbn("123-456")).thenReturn(List.of());
+        when(bookRepository.findByIsbn("789-012")).thenReturn(List.of());
+        when(bookRepository.save(any(Book.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        BookDto result1 = libraryService.registerBook(book1);
+        BookDto result2 = libraryService.registerBook(book2);
+
+        assertNotEquals(result1.getIsbn(), result2.getIsbn());
+        assertEquals(result1.getTitle(), result2.getTitle());
+        assertEquals(result1.getAuthor(), result2.getAuthor());
+    }
+
+    @Test
+    void registerBook_SameIsbnDifferentTitleAuthor_ThrowsException() {
+        // Requirement 2 & 3: Same ISBN must have same title and author
+        BookDto newBook = new BookDto();
+        newBook.setIsbn("123-456");
+        newBook.setTitle("Different Title");
+        newBook.setAuthor("Different Author");
+
+        Book existingBook = new Book();
+        existingBook.setIsbn("123-456");
+        existingBook.setTitle("Original Title");
+        existingBook.setAuthor("Original Author");
+
+        when(bookRepository.findByIsbn("123-456")).thenReturn(List.of(existingBook));
+
+        assertThrows(InvalidBookDataException.class, () -> libraryService.registerBook(newBook));
+    }
+
+    @Test
+    void registerBook_MultipleCopiesSameIsbn_Success() {
+        // Requirement 4: Multiple copies with same ISBN are allowed
+        BookDto bookDto = new BookDto();
+        bookDto.setIsbn("123-456");
+        bookDto.setTitle("Test Title");
+        bookDto.setAuthor("Test Author");
+
+        Book existingBook = new Book();
+        existingBook.setIsbn("123-456");
+        existingBook.setTitle("Test Title");
+        existingBook.setAuthor("Test Author");
+
+        when(bookRepository.findByIsbn("123-456")).thenReturn(List.of(existingBook));
+        when(bookRepository.save(any(Book.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        BookDto result = libraryService.registerBook(bookDto);
+
+        assertNotNull(result);
+        assertEquals(bookDto.getIsbn(), result.getIsbn());
+        assertEquals(bookDto.getTitle(), result.getTitle());
+        assertEquals(bookDto.getAuthor(), result.getAuthor());
+    }
+
+
+    @Test
+    void registerBook_WithExistingIsbn_Success() {
+        Book existingBook = new Book();
+
+        existingBook.setIsbn(bookDTO.getIsbn());
+        existingBook.setTitle(bookDTO.getTitle());
+        existingBook.setAuthor(bookDTO.getAuthor());
+
+        when(bookRepository.findByIsbn(bookDTO.getIsbn())).thenReturn(List.of(existingBook));
+        when(bookRepository.save(any(Book.class))).thenReturn(testBook);
+
+        BookDto result = libraryService.registerBook(bookDTO);
+
+        assertNotNull(result);
+        assertEquals(testBook.getIsbn(), result.getIsbn());
+    }
+
+    @Test
+    void registerBook_WithInconsistentIsbn_ThrowsException() {
+        Book existingBook = new Book();
+        existingBook.setIsbn(bookDTO.getIsbn());
+        existingBook.setTitle("Different Title");
+        existingBook.setAuthor("Different Author");
+
+        when(bookRepository.findByIsbn(bookDTO.getIsbn())).thenReturn(List.of(existingBook));
+
+        assertThrows(InvalidBookDataException.class, () -> libraryService.registerBook(bookDTO));
+    }
+
 }

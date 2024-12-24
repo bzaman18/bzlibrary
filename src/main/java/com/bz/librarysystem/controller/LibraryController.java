@@ -1,6 +1,7 @@
 package com.bz.librarysystem.controller;
 
 import com.bz.librarysystem.dto.BookDto;
+import com.bz.librarysystem.dto.BookInventoryDto;
 import com.bz.librarysystem.dto.BorrowerDto;
 import com.bz.librarysystem.service.LibraryService;
 import com.bz.librarysystem.service.impl.LibraryServiceImpl;
@@ -104,5 +105,12 @@ public class LibraryController {
     public ResponseEntity<List<BookDto>> getAllBooks() {
         return ResponseEntity.ok(libraryService.getAllBooks());
     }
+
+
+    @GetMapping("/books/inventory")
+    public ResponseEntity<List<BookInventoryDto>> getAllBooksInventory() {
+        return ResponseEntity.ok(libraryService.getBookInventory());
+    }
+
 }
 

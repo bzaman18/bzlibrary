@@ -1,6 +1,7 @@
 package com.bz.librarysystem.service;
 
 import com.bz.librarysystem.dto.BookDto;
+import com.bz.librarysystem.dto.BookInventoryDto;
 import com.bz.librarysystem.dto.BorrowerDto;
 import com.bz.librarysystem.entity.Book;
 import com.bz.librarysystem.entity.Borrower;
@@ -16,4 +17,5 @@ public interface LibraryService {
     public LoanRecord borrowBook(UUID bookId, UUID borrowerId);
     public LoanRecord returnBook(UUID bookId);
     public List<BookDto> getAllBooks();
+    public List<BookInventoryDto> getBookInventory();
 }

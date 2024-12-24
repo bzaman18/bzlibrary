@@ -23,4 +23,3 @@ CMD ["java", "-Dlogging.file.path=${LOG_FILE_PATH}", "-jar", "app.jar"]
 
 # docker run -p 8080:8080 bzlibrary
 # docker run -p 8080:8080 -e "SPRING_PROFILES_ACTIVE=prod" bzlibrary
-

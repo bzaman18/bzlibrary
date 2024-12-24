@@ -1,5 +1,6 @@
 package com.bz.librarysystem.service.impl;
 
+import com.bz.librarysystem.dto.BookInventoryDto;
 import com.bz.librarysystem.dto.BookDto;
 import com.bz.librarysystem.dto.BorrowerDto;
 import com.bz.librarysystem.entity.Book;
@@ -7,6 +8,7 @@ import com.bz.librarysystem.entity.Borrower;
 import com.bz.librarysystem.entity.LoanRecord;
 import com.bz.librarysystem.exception.BookAlreadyBorrowedException;
 import com.bz.librarysystem.exception.DuplicateBorrowerEmailException;
+import com.bz.librarysystem.exception.InvalidBookDataException;
 import com.bz.librarysystem.exception.ResourceNotFoundException;
 import com.bz.librarysystem.repository.BookRepository;
 import com.bz.librarysystem.repository.BorrowerRepository;
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 @Service
 public class LibraryServiceImpl implements LibraryService {
@@ -55,7 +58,7 @@ public class LibraryServiceImpl implements LibraryService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public BookDto registerBook(BookDto bookDto) {
-        System.out.println("bookDto is " + bookDto.getId() + ":" + bookDto.getTitle());
+        validateIsbnData(bookDto);
 
         Book book = new Book();
         BeanUtils.copyProperties(bookDto, book);
@@ -141,5 +144,39 @@ public class LibraryServiceImpl implements LibraryService {
         return bookRepository.findAll().stream()
                 .map(book -> modelMapper.map(book, BookDto.class))
                 .toList();
+    }
+
+    public List<BookInventoryDto> getBookInventory() {
+        List<Book> books = bookRepository.findAll();
+        // Group by ISBN to show they're different books
+        return books.stream()
+                .collect(Collectors.groupingBy(Book::getIsbn))
+                .entrySet().stream()
+                .map(entry -> new BookInventoryDto(
+                        entry.getKey(),
+                        entry.getValue().get(0).getTitle(),
+                        entry.getValue().get(0).getAuthor(),
+                        entry.getValue().size()
+                ))
+                .collect(Collectors.toList());
+
+    }
+
+    private void validateIsbnData(BookDto newBook) {
+        List<Book> existingBooks = bookRepository.findByIsbn(newBook.getIsbn());
+
+        if (!existingBooks.isEmpty()) {
+            Book existingBook = existingBooks.get(0);
+
+            // Books with same ISBN must have same title and author
+            if (!existingBook.getTitle().equals(newBook.getTitle()) ||
+                    !existingBook.getAuthor().equals(newBook.getAuthor())) {
+                throw new InvalidBookDataException(
+                        String.format("Books with ISBN %s must have title '%s' and author '%s'",
+                                newBook.getIsbn(), existingBook.getTitle(), existingBook.getAuthor())
+                );
+            }
+
+        }
     }
 }
